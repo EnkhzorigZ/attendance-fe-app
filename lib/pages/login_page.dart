@@ -15,10 +15,26 @@ class _LoginPageState extends State<LoginPage> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _rememberMe = false;
 
   @override
   void initState() {
     super.initState();
+    _loadSavedPhone();
+  }
+
+  Future<void> _loadSavedPhone() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedPhone = prefs.getString('saved_phone');
+    final savedPassword = prefs.getString('saved_password');
+
+    if (savedPhone != null) {
+      setState(() {
+        _phoneController.text = savedPhone;
+        if (savedPassword != null) _passwordController.text = savedPassword;
+        _rememberMe = true;
+      });
+    }
   }
 
   @override
@@ -45,6 +61,13 @@ class _LoginPageState extends State<LoginPage> {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('refresh', response['refresh']);
         await prefs.setString('token', response['access']);
+        if (_rememberMe) {
+          await prefs.setString('saved_phone', _phoneController.text.trim());
+          await prefs.setString('saved_password', _passwordController.text);
+        } else {
+          await prefs.remove('saved_phone');
+          await prefs.remove('saved_password');
+        }
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Center(child: Text('Амжилттай нэвтэрлээ'))),
@@ -137,7 +160,32 @@ class _LoginPageState extends State<LoginPage> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: Checkbox(
+                          value: _rememberMe,
+                          onChanged: (v) {
+                            setState(() => _rememberMe = v ?? false);
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() => _rememberMe = !_rememberMe);
+                        },
+                        child: Text(
+                          'Намайг сана',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
                   FilledButton(
                     onPressed: _login,
                     child: const Text('Нэвтрэх'),

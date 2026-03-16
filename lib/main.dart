@@ -159,12 +159,11 @@ class MyApp extends StatelessWidget {
           theme: lightTheme(),
           darkTheme: darkTheme(),
           themeMode: ThemeController.themeMode.value,
-          home:
-              isLoggedIn ? const MyHomePage(title: 'Home') : const LoginPage(),
+          home: isLoggedIn ? const MyHomePage() : const LoginPage(),
           routes: {
             "/login": (context) => const LoginPage(),
             "/register": (context) => const RegisterPage(),
-            "/home": (context) => const MyHomePage(title: 'Home'),
+            "/home": (context) => const MyHomePage(),
           },
         );
       },

@@ -2,11 +2,15 @@ import 'package:attendance_fe_app/pages/home_page.dart';
 import 'package:attendance_fe_app/pages/register_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'pages/login_page.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
-  runApp(const MyApp());
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+  runApp(MyApp(isLoggedIn: token != null));
 }
 
 class AppColors {
@@ -31,7 +35,9 @@ class ThemeController {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+
+  const MyApp({super.key, required this.isLoggedIn});
 
   ThemeData lightTheme() {
     return ThemeData(
@@ -153,8 +159,8 @@ class MyApp extends StatelessWidget {
           theme: lightTheme(),
           darkTheme: darkTheme(),
           themeMode: ThemeController.themeMode.value,
-          home: const LoginPage(),
-          initialRoute: "/login",
+          home:
+              isLoggedIn ? const MyHomePage(title: 'Home') : const LoginPage(),
           routes: {
             "/login": (context) => const LoginPage(),
             "/register": (context) => const RegisterPage(),

@@ -209,7 +209,11 @@ class _MyHomePageState extends State<MyHomePage> {
     final companyLat = company?['latitude'] as double?;
     final companyLng = company?['longitude'] as double?;
 
-    if (companyLat == null || companyLng == null) return const SizedBox();
+    if (companyLat == null || companyLng == null) {
+      return const SizedBox(
+        height: 300,
+      );
+    }
 
     final companyPos = LatLng(companyLat, companyLng);
     final markers = <Marker>{
@@ -263,7 +267,7 @@ class _MyHomePageState extends State<MyHomePage> {
         icon: Icon(icon, color: Colors.white),
         label: Text(
           text,
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         style: FilledButton.styleFrom(
           backgroundColor: color,
@@ -327,24 +331,24 @@ class _MyHomePageState extends State<MyHomePage> {
                         children: [
                           Text(
                             "${_profileData?['last_name'] ?? ''} ${_profileData?['first_name'] ?? ''}",
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           if (_profileData?['is_approved'] == true)
-                            Icon(
+                            const Icon(
                               Icons.verified,
                               color: Colors.greenAccent,
                               size: 20,
                             ),
                         ],
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
                         "📞 ${_profileData?['phone_number'] ?? ''}",
-                        style: TextStyle(),
+                        style: const TextStyle(),
                       ),
                       Text(
                         "✉️ ${_profileData?['email'] ?? ''}",
@@ -372,7 +376,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 child: FilledButton.icon(
                   icon: const Icon(Icons.logout),
-                  label: Text("Гарах"),
+                  label: Text(
+                    "Гарах",
+                    style: TextStyle(color: Colors.white),
+                  ),
                   onPressed: () async {
                     final prefs = await SharedPreferences.getInstance();
                     await prefs.remove('token');

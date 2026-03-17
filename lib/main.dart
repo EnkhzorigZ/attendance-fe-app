@@ -1,3 +1,4 @@
+import 'package:attendance_fe_app/pages/history_page.dart';
 import 'package:attendance_fe_app/pages/home_page.dart';
 import 'package:attendance_fe_app/pages/register_page.dart';
 import 'package:flutter/material.dart';
@@ -87,7 +88,9 @@ class MyApp extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          textStyle: const TextStyle(
+              fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+          iconColor: Colors.white,
         ),
       ),
     );
@@ -142,7 +145,12 @@ class MyApp extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+          iconColor: Colors.white,
         ),
       ),
     );
@@ -164,6 +172,7 @@ class MyApp extends StatelessWidget {
             "/login": (context) => const LoginPage(),
             "/register": (context) => const RegisterPage(),
             "/home": (context) => const MyHomePage(),
+            "/history": (context) => const HistoryPage(),
           },
         );
       },

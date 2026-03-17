@@ -224,8 +224,8 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
-      drawer: SafeArea(
-        child: Drawer(
+      drawer: Drawer(
+        child: SafeArea(
           child: Column(
             children: [
               const DrawerHeader(child: Text("Хэрэглэгч")),
@@ -242,7 +242,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 title: const Text("Гарах"),
                 onTap: () async {
                   final prefs = await SharedPreferences.getInstance();
-                  await prefs.clear();
+                  await prefs.remove('token');
+                  await prefs.remove('refresh');
 
                   Navigator.pushNamedAndRemoveUntil(
                       context, "/login", (_) => false);

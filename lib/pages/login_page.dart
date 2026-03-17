@@ -16,6 +16,7 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _rememberMe = false;
+  bool _loading = false;
 
   @override
   void initState() {
@@ -25,13 +26,15 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _loadSavedPhone() async {
     final prefs = await SharedPreferences.getInstance();
-    final savedPhone = prefs.getString('saved_phone');
-    final savedPassword = prefs.getString('saved_password');
+    final rememberMe = prefs.getBool('remember_me') ?? false;
 
-    if (savedPhone != null) {
+    if (rememberMe) {
+      final savedPhone = prefs.getString('saved_phone') ?? '';
+      final savedPassword = prefs.getString('saved_password') ?? '';
+
       setState(() {
         _phoneController.text = savedPhone;
-        if (savedPassword != null) _passwordController.text = savedPassword;
+        _passwordController.text = savedPassword;
         _rememberMe = true;
       });
     }
@@ -46,6 +49,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
+      setState(() => _loading = true);
       final body = {
         "phone_number": _phoneController.text.trim(),
         "password": _passwordController.text,
@@ -61,6 +65,7 @@ class _LoginPageState extends State<LoginPage> {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('refresh', response['refresh']);
         await prefs.setString('token', response['access']);
+        await prefs.setBool('remember_me', _rememberMe);
         if (_rememberMe) {
           await prefs.setString('saved_phone', _phoneController.text.trim());
           await prefs.setString('saved_password', _passwordController.text);
@@ -79,6 +84,7 @@ class _LoginPageState extends State<LoginPage> {
           (route) => false,
         );
       }
+      setState(() => _loading = false);
     }
   }
 
@@ -186,8 +192,16 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 24),
                   FilledButton(
-                    onPressed: _login,
-                    child: const Text('Нэвтрэх'),
+                    onPressed: _loading ? null : _login,
+                    child: _loading
+                        ? SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text('Нэвтрэх'),
                   ),
                   const SizedBox(height: 16),
                   TextButton(

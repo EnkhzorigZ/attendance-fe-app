@@ -20,13 +20,29 @@ class _MyHomePageState extends State<MyHomePage> {
   String? _address;
   String? _lastCheckIn;
   Position? _position;
+  Map<String, dynamic>? _profileData;
 
   final LocalAuthentication _auth = LocalAuthentication();
 
   @override
   void initState() {
     super.initState();
+    _loadProfile();
     _loadLastCheckIn();
+  }
+
+  Future<void> _loadProfile() async {
+    final res = await apiRequest(
+      endpoint: '/api/accounts/profile/',
+      method: HttpMethod.get,
+      useToken: true,
+      context: context,
+    );
+    if (res != null) {
+      setState(() {
+        _profileData = res;
+      });
+    }
   }
 
   /// 🔐 BIOMETRIC
@@ -211,7 +227,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Ирц"),
+        title: Text(
+          '${_profileData?['last_name'] ?? ''} ${_profileData?['first_name'] ?? ''}',
+          style: theme.textTheme.titleMedium,
+        ),
         centerTitle: true,
         actions: [
           IconButton(
@@ -228,7 +247,46 @@ class _MyHomePageState extends State<MyHomePage> {
         child: SafeArea(
           child: Column(
             children: [
-              const DrawerHeader(child: Text("Хэрэглэгч")),
+              DrawerHeader(
+                decoration: BoxDecoration(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          "${_profileData?['last_name'] ?? ''} ${_profileData?['first_name'] ?? ''}",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        if (_profileData?['is_approved'] == true)
+                          Icon(
+                            Icons.verified,
+                            color: Colors.greenAccent,
+                            size: 20,
+                          ),
+                      ],
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      "📞 ${_profileData?['phone_number'] ?? ''}",
+                      style: TextStyle(),
+                    ),
+                    Text(
+                      "✉️ ${_profileData?['email'] ?? ''}",
+                      style: TextStyle(),
+                    ),
+                    Text(
+                      "🏢 ${_profileData?['company']?['name'] ?? ''}",
+                      style: TextStyle(),
+                    ),
+                  ],
+                ),
+              ),
               ListTile(
                 leading: const Icon(Icons.history),
                 title: const Text("Түүх"),
@@ -237,18 +295,23 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               ),
               const Spacer(),
-              ListTile(
-                leading: const Icon(Icons.logout, color: Colors.red),
-                title: const Text("Гарах"),
-                onTap: () async {
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.remove('token');
-                  await prefs.remove('refresh');
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                ),
+                child: FilledButton.icon(
+                  icon: const Icon(Icons.logout),
+                  label: Text("Гарах"),
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.remove('token');
+                    await prefs.remove('refresh');
 
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, "/login", (_) => false);
-                },
-              )
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, "/login", (_) => false);
+                  },
+                ),
+              ),
             ],
           ),
         ),

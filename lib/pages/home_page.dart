@@ -1,4 +1,7 @@
 import 'package:attendance_fe_app/main.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -175,7 +178,9 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() => _loading = false);
 
     if (res != null) {
-      final msg = action == 'checkin' ? 'Амжилттай ирлээ!' : 'Амжилттай явлаа!';
+      final msg = action == 'checkin'
+          ? 'Амжилттай бүртгэгдлээ.!'
+          : 'Амжилттай бүртгэгдлээ.!';
 
       if (action == 'checkin') {
         await _saveCheckIn();
@@ -185,6 +190,10 @@ class _MyHomePageState extends State<MyHomePage> {
       _showMessage(msg);
       setState(() => _statusText = msg);
     }
+  }
+
+  Future<void> _refresh() async {
+    await Future.wait([_loadProfile(), _loadLastCheckIn()]);
   }
 
   /// UI HELPERS
@@ -225,7 +234,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: SizedBox(
-        height: 250,
+        height: 300,
         child: GoogleMap(
           initialCameraPosition: CameraPosition(
             target: companyPos,
@@ -233,8 +242,13 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           markers: markers,
           zoomControlsEnabled: false,
-          myLocationEnabled: true, // show the blue dot
-          myLocationButtonEnabled: true, // show the target button
+          myLocationEnabled: true,
+          myLocationButtonEnabled: true,
+          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+            Factory<OneSequenceGestureRecognizer>(
+              () => EagerGestureRecognizer(),
+            ),
+          },
         ),
       ),
     );
@@ -246,8 +260,11 @@ class _MyHomePageState extends State<MyHomePage> {
       height: 55,
       child: FilledButton.icon(
         onPressed: _loading ? null : onTap,
-        icon: Icon(icon),
-        label: Text(text),
+        icon: Icon(icon, color: Colors.white),
+        label: Text(
+          text,
+          style: TextStyle(color: Colors.white),
+        ),
         style: FilledButton.styleFrom(
           backgroundColor: color,
           shape: RoundedRectangleBorder(
@@ -264,6 +281,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
+        scrolledUnderElevation: 0.0,
+        backgroundColor: Colors.transparent,
         title: Text(
           '${_profileData?['last_name'] ?? ''} ${_profileData?['first_name'] ?? ''}',
           style: theme.textTheme.titleMedium,
@@ -284,44 +303,59 @@ class _MyHomePageState extends State<MyHomePage> {
         child: SafeArea(
           child: Column(
             children: [
-              DrawerHeader(
-                decoration: BoxDecoration(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          "${_profileData?['last_name'] ?? ''} ${_profileData?['first_name'] ?? ''}",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+              Theme(
+                data: Theme.of(context).copyWith(
+                  dividerTheme: const DividerThemeData(
+                    color: Colors.transparent,
+                  ),
+                ),
+                child: DrawerHeader(
+                  decoration: BoxDecoration(
+                    color: Colors.transparent, // removes default color
+                    border: Border.all(
+                      color: Colors.transparent, // ensures no border
+                      width: 0,
+                    ),
+                  ),
+                  margin: EdgeInsets.zero, // removes any default margin
+                  padding: EdgeInsets.symmetric(horizontal: 16), // optional:
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            "${_profileData?['last_name'] ?? ''} ${_profileData?['first_name'] ?? ''}",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        SizedBox(width: 8),
-                        if (_profileData?['is_approved'] == true)
-                          Icon(
-                            Icons.verified,
-                            color: Colors.greenAccent,
-                            size: 20,
-                          ),
-                      ],
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      "📞 ${_profileData?['phone_number'] ?? ''}",
-                      style: TextStyle(),
-                    ),
-                    Text(
-                      "✉️ ${_profileData?['email'] ?? ''}",
-                      style: TextStyle(),
-                    ),
-                    Text(
-                      "🏢 ${_profileData?['company']?['name'] ?? ''}",
-                      style: TextStyle(),
-                    ),
-                  ],
+                          SizedBox(width: 8),
+                          if (_profileData?['is_approved'] == true)
+                            Icon(
+                              Icons.verified,
+                              color: Colors.greenAccent,
+                              size: 20,
+                            ),
+                        ],
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        "📞 ${_profileData?['phone_number'] ?? ''}",
+                        style: TextStyle(),
+                      ),
+                      Text(
+                        "✉️ ${_profileData?['email'] ?? ''}",
+                        style: TextStyle(),
+                      ),
+                      Text(
+                        "🏢 ${_profileData?['company']?['name'] ?? ''}",
+                        style: TextStyle(),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               ListTile(
@@ -353,62 +387,68 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            /// CARD
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme.cardColor,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                children: [
-                  Icon(Icons.access_time,
-                      size: 60, color: theme.colorScheme.primary),
-                  const SizedBox(height: 10),
-                  Text("Ирц бүртгэл", style: theme.textTheme.titleLarge),
-                  const SizedBox(height: 8),
-                  Text(_statusText, textAlign: TextAlign.center),
-                  // if (_address != null)
-                  //   Padding(
-                  //     padding: const EdgeInsets.only(top: 8),
-                  //     child:
-                  //         Text(_address!, style: const TextStyle(fontSize: 12)),
-                  //   ),
-                  if (_lastCheckIn != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        "Сүүлд: ${DateTime.parse(_lastCheckIn!).toLocal()}",
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            /// MAP
-            _map(),
-
-            const SizedBox(height: 20),
-
-            /// BUTTONS
-            _btn("Ирсэн", Icons.login, theme.colorScheme.primary,
-                () => _attendanceAction("checkin")),
-
-            const SizedBox(height: 10),
-
-            _btn("Явсан", Icons.logout, theme.colorScheme.error,
-                () => _attendanceAction("checkout")),
-
-            const SizedBox(height: 20),
-          ],
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
         ),
+        slivers: [
+          CupertinoSliverRefreshControl(
+            onRefresh: _refresh,
+          ),
+          SliverPadding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                /// CARD
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: theme.cardColor,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(Icons.access_time,
+                          size: 60, color: theme.colorScheme.primary),
+                      const SizedBox(height: 10),
+                      Text("Ирц бүртгэл", style: theme.textTheme.titleLarge),
+                      const SizedBox(height: 8),
+                      Text(_statusText, textAlign: TextAlign.center),
+                      if (_lastCheckIn != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            "Сүүлд: ${DateTime.parse(_lastCheckIn!).toLocal().toString().substring(0, 16)}",
+                            style: const TextStyle(
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                /// MAP
+                _map(),
+
+                const SizedBox(height: 20),
+
+                /// BUTTONS
+                _btn("Ирсэн", Icons.login, theme.colorScheme.primary,
+                    () => _attendanceAction("checkin")),
+
+                const SizedBox(height: 10),
+
+                _btn("Явсан", Icons.logout, theme.colorScheme.error,
+                    () => _attendanceAction("checkout")),
+
+                const SizedBox(height: 20),
+              ]),
+            ),
+          ),
+        ],
       ),
     );
   }

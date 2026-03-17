@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
         secondary: AppColors.secondary,
       ),
       appBarTheme: const AppBarTheme(
-        elevation: 0,
+        // elevation: 0,
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.black,
       ),
@@ -58,7 +58,7 @@ class MyApp extends StatelessWidget {
         backgroundColor: AppColors.primary,
       ),
       cardTheme: CardThemeData(
-        elevation: 0,
+        // elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -105,7 +105,7 @@ class MyApp extends StatelessWidget {
         surface: AppColors.darkSurface,
       ),
       appBarTheme: const AppBarTheme(
-        elevation: 0,
+        // elevation: 0,
         backgroundColor: Colors.transparent,
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
@@ -113,7 +113,7 @@ class MyApp extends StatelessWidget {
       ),
       cardTheme: CardThemeData(
         color: AppColors.darkSurface,
-        elevation: 0,
+        // elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),

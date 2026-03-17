@@ -6,6 +6,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
+import 'dart:ui' as ui;
+import 'package:flutter/services.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -17,10 +19,10 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   bool _loading = false;
   String _statusText = "Та ирцээ бүртгүүлнэ үү";
-  String? _address;
   String? _lastCheckIn;
   Position? _position;
   Map<String, dynamic>? _profileData;
+  BitmapDescriptor? _companyIcon;
 
   final LocalAuthentication _auth = LocalAuthentication();
 
@@ -29,6 +31,27 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _loadProfile();
     _loadLastCheckIn();
+    _loadCompanyIcon();
+  }
+
+  Future<void> _loadCompanyIcon() async {
+    _companyIcon = await getResizedBitmap('assets/company.png', 100);
+    setState(() {});
+  }
+
+  Future<BitmapDescriptor> getResizedBitmap(String path, int size) async {
+    final data = await rootBundle.load(path);
+    final codec = await ui.instantiateImageCodec(
+      data.buffer.asUint8List(),
+      targetWidth: size,
+      targetHeight: size,
+    );
+    final frame = await codec.getNextFrame();
+    final byteData =
+        await frame.image.toByteData(format: ui.ImageByteFormat.png);
+    final resizedBytes = byteData!.buffer.asUint8List();
+    // ignore: deprecated_member_use
+    return BitmapDescriptor.fromBytes(resizedBytes);
   }
 
   Future<void> _loadProfile() async {
@@ -132,7 +155,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
     setState(() {
       _position = pos;
-      _address = addr;
       _statusText = addr;
     });
 
@@ -174,30 +196,45 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _map() {
-    if (_position == null) return const SizedBox();
+    final company = _profileData?['company'];
+    final companyLat = company?['latitude'] as double?;
+    final companyLng = company?['longitude'] as double?;
+
+    if (companyLat == null || companyLng == null) return const SizedBox();
+
+    final companyPos = LatLng(companyLat, companyLng);
+    final markers = <Marker>{
+      Marker(
+        markerId: MarkerId("company"),
+        position: companyPos,
+        infoWindow: InfoWindow(title: company?['name'] ?? 'Компани'),
+        icon: _companyIcon!,
+      ),
+    };
+
+    if (_position != null) {
+      markers.add(
+        Marker(
+          markerId: const MarkerId("me"),
+          position: LatLng(_position!.latitude, _position!.longitude),
+          infoWindow: const InfoWindow(title: 'Миний байршил'),
+        ),
+      );
+    }
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: SizedBox(
-        height: 180,
+        height: 250,
         child: GoogleMap(
           initialCameraPosition: CameraPosition(
-            target: LatLng(
-              _position!.latitude,
-              _position!.longitude,
-            ),
+            target: companyPos,
             zoom: 16,
           ),
-          markers: {
-            Marker(
-              markerId: const MarkerId("me"),
-              position: LatLng(
-                _position!.latitude,
-                _position!.longitude,
-              ),
-            )
-          },
+          markers: markers,
           zoomControlsEnabled: false,
+          myLocationEnabled: true, // show the blue dot
+          myLocationButtonEnabled: true, // show the target button
         ),
       ),
     );
@@ -317,12 +354,12 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             /// CARD
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: theme.cardColor,
                 borderRadius: BorderRadius.circular(20),
@@ -335,12 +372,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   Text("Ирц бүртгэл", style: theme.textTheme.titleLarge),
                   const SizedBox(height: 8),
                   Text(_statusText, textAlign: TextAlign.center),
-                  if (_address != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child:
-                          Text(_address!, style: const TextStyle(fontSize: 12)),
-                    ),
+                  // if (_address != null)
+                  //   Padding(
+                  //     padding: const EdgeInsets.only(top: 8),
+                  //     child:
+                  //         Text(_address!, style: const TextStyle(fontSize: 12)),
+                  //   ),
                   if (_lastCheckIn != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
@@ -370,8 +407,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 () => _attendanceAction("checkout")),
 
             const SizedBox(height: 20),
-
-            if (_loading) const CircularProgressIndicator(),
           ],
         ),
       ),

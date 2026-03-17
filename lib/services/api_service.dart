@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -49,9 +50,15 @@ Future<dynamic> apiRequest({
         response = await http.delete(uri, headers: headers, body: encodedBody);
     }
   } catch (e) {
-    if (showError && context != null && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Сүлжээний алдаа: $e')),
+    if (showError) {
+      Fluttertoast.showToast(
+        msg: 'Сүлжээний алдаа: $e',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
       );
     }
     return null;
@@ -63,11 +70,17 @@ Future<dynamic> apiRequest({
     return json;
   }
 
-  if (showError && context != null && context.mounted) {
+  if (showError) {
     final message =
         json is Map ? (json['message'] ?? json.toString()) : json.toString();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Center(child: Text(message.toString()))),
+    Fluttertoast.showToast(
+      msg: message.toString(),
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      fontSize: 16.0,
     );
   }
 

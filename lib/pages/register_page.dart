@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../services/api_service.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -78,8 +79,14 @@ class _RegisterPageState extends State<RegisterPage> {
       );
 
       if (response != null && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Center(child: Text('Бүртгэл амжилттай'))),
+        Fluttertoast.showToast(
+          msg: 'Бүртгэл амжилттай',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+          fontSize: 16.0,
         );
         Navigator.pop(context);
       }
@@ -151,7 +158,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   keyboardType: TextInputType.phone,
                   decoration: const InputDecoration(
                     labelText: 'Утасны дугаар',
-                    hintText: '9999-9999',
+                    hintText: '',
                     prefixIcon: Icon(Icons.phone_outlined),
                   ),
                   validator: (v) => v == null || v.trim().isEmpty
@@ -185,7 +192,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 _loadingCompanies
                     ? const Center(child: CircularProgressIndicator())
                     : DropdownButtonFormField<int>(
-                        value: _selectedCompanyId,
+                        initialValue: _selectedCompanyId,
                         decoration: const InputDecoration(
                           labelText: 'Байгууллага',
                           prefixIcon: Icon(Icons.business_outlined),
@@ -206,7 +213,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 // Role dropdown
                 DropdownButtonFormField<String>(
-                  value: _selectedRole,
+                  initialValue: _selectedRole,
                   decoration: const InputDecoration(
                     labelText: 'Эрх',
                     prefixIcon: Icon(Icons.admin_panel_settings_outlined),
@@ -254,7 +261,10 @@ class _RegisterPageState extends State<RegisterPage> {
                 // Submit
                 FilledButton(
                   onPressed: _register,
-                  child: const Text('Бүртгүүлэх'),
+                  child: const Text(
+                    'Бүртгүүлэх',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             ),

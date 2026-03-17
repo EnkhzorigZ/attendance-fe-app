@@ -1,5 +1,6 @@
 import 'package:attendance_fe_app/pages/home_page.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 
@@ -73,11 +74,15 @@ class _LoginPageState extends State<LoginPage> {
           await prefs.remove('saved_phone');
           await prefs.remove('saved_password');
         }
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Center(child: Text('Амжилттай нэвтэрлээ'))),
-          );
-        }
+        Fluttertoast.showToast(
+          msg: 'Амжилттай нэвтэрлээ',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const MyHomePage()),
@@ -128,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
                     keyboardType: TextInputType.phone,
                     decoration: const InputDecoration(
                       labelText: 'Утасны дугаар',
-                      hintText: '9999-9999',
+                      hintText: '',
                       prefixIcon: Icon(Icons.phone_outlined),
                     ),
                     validator: (value) {
@@ -201,7 +206,10 @@ class _LoginPageState extends State<LoginPage> {
                               strokeWidth: 2,
                             ),
                           )
-                        : const Text('Нэвтрэх'),
+                        : Text(
+                            'Нэвтрэх',
+                            style: TextStyle(color: Colors.white),
+                          ),
                   ),
                   const SizedBox(height: 16),
                   TextButton(

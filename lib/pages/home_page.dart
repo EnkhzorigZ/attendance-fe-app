@@ -8,6 +8,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../services/api_service.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
@@ -199,8 +200,14 @@ class _MyHomePageState extends State<MyHomePage> {
   /// UI HELPERS
   void _showMessage(String text) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(text)),
+    Fluttertoast.showToast(
+      msg: text,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      fontSize: 16.0,
     );
   }
 
@@ -384,7 +391,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     final prefs = await SharedPreferences.getInstance();
                     await prefs.remove('token');
                     await prefs.remove('refresh');
-
                     Navigator.pushNamedAndRemoveUntil(
                         context, "/login", (_) => false);
                   },

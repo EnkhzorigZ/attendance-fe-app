@@ -57,7 +57,7 @@ class MyApp extends StatelessWidget {
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.primary,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -111,7 +111,7 @@ class MyApp extends StatelessWidget {
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.primary,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.darkSurface,
         elevation: 0,
         shape: RoundedRectangleBorder(
